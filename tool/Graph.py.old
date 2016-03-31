@@ -1,0 +1,134 @@
+# Graph for searching usage
+# Graph is a dictionary with structure:
+# graph = {
+#   vertexId : {nei = set(), val = someVal}
+# }
+# tuples = [(id, score), (id, score)..]
+# eTable = ((1, 3, 4),
+#           (2, 3, 5),..)
+
+
+def Graph(tuples, eTable):
+    if not (isinstance(tuples, list) and isinstance(eTable, tuple) and
+            isinstance(eTable[0], tuple) and len(tuples) == len(eTable)):
+        raise TypeError
+    graph = dict()
+    for vid, score in tuples:
+        assert(vid not in graph)
+        graph[vid] = dict()
+        graph[vid]['val'] = score
+        graph[vid]['nei'] = set(eTable[vid])
+    return graph
+
+
+def GraphAddV(graph, v, score):
+    assert(v not in graph)
+    graph[v] = dict()
+    graph[v]['val'] = score
+    graph[v]['nei'] = set()
+
+
+def GraphDelV(graph, v):
+    assert(v in graph)
+    return graph.pop(v)
+
+
+def GraphAddE(graph, v1, v2):
+    assert(v1 in graph and v2 in graph)
+    graph[v1]['nei'].add(v2)
+    graph[v2]['nei'].add(v1)
+
+
+def GraphDelE(graph, v1, v2):
+    assert(v1 in graph and v2 in graph)
+    graph[v1]['nei'].remove(v2)
+    graph[v2]['nei'].remove(v1)
+
+
+def VinGraph(graph, v):
+    return v in graph
+
+
+def EinGraph(graph, v1, v2):
+    return (v1 in graph and v2 in graph and v2 in graph[v1]['nei'] and
+            v1 in graph[v2]['nei'])
+
+
+def ConductGraph(graph, vertice):
+    if not (isinstance(vertice, list) or isinstance(vertice, tuple) or
+            isinstance(vertice, set) or isinstance(vertice, dict)):
+        raise TypeError
+    cGraph = dict()
+    for vid in vertice:
+        assert(vid not in cGraph and vid in graph)
+        cGraph[vid] = graph[vid]
+    return cGraph
+
+
+def GraphGetNeis(graph, v):
+    assert(v in graph)
+    return graph[v]['nei'] & set(graph.keys())
+
+
+def GraphGetScore(graph, v):
+    assert(v in graph)
+    return graph[v]['val']
+
+
+if __name__ == '__main__':
+    """
+    testGrph = {
+        0: {'val': 1, 'nei': set([1, 5, 6])},
+        1: {'val': 2, 'nei': set([0, 2, 5])},
+        2: {'val': 3, 'nei': set([1, 3, 4])},
+        3: {'val': 4, 'nei': set([2, 4])},
+        4: {'val': 5, 'nei': set([2, 3, 5])},
+        5: {'val': 6, 'nei': set([0, 1, 4, 6, 7])},
+        6: {'val': 7, 'nei': set([0, 5])},
+        7: {'val': 8, 'nei': set([5])}
+    }
+    """
+    testVertice = list()
+    for i in xrange(7):
+        testVertice.append((i, i + 1))
+    eTable = ((1, 5, 6),
+              (0, 2, 5),
+              (1, 3, 4),
+              (2, 4),
+              (2, 3, 5),
+              (0, 1, 4, 6, 7),
+              (0, 5))
+    testGraph = Graph(testVertice, eTable)
+    GraphAddV(testGraph, 7, 8)
+    GraphAddE(testGraph, 5, 7)
+    GraphAddV(testGraph, 8, 9)
+    GraphAddV(testGraph, 9, 10)
+    GraphAddE(testGraph, 8, 9)
+    GraphAddV(testGraph, 10, 11)
+    print EinGraph(testGraph, 5, 7)
+    print ConductGraph(testGraph, (0, 1, 5))
+
+    def travis(graph, v):
+        label = set()
+
+        def DFS(graph, v):
+            assert(v in graph)
+            stack = list()
+            stack.append(v)
+            while len(stack) != 0:
+                node = stack.pop()
+                if node not in label:
+                    for neib in graph[node]['nei']:
+                        if neib not in label:
+                            stack.append(neib)
+                    label.add(node)
+                    print '(%d, %d)' % (node, graph[node]['val'])
+                if len(stack) == 0 and len(label) != len(graph):
+                    for exNode in set(graph.keys()).difference(label):
+                        DFS(graph, exNode)
+
+        DFS(graph, v)
+
+    travis(testGraph, 4)
+    subTestGraph = ConductGraph(testGraph, [0, 1, 5])
+    print GraphGetNeis(subTestGraph, 5)
