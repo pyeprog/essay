@@ -84,10 +84,10 @@ class Graph(object):
         try:
             return self.items[vid]
         except AttributeError:
-            self.updtG()
+            self.sort()
             return self.items[vid]
 
-    def updtG(self, reverse=True):
+    def sort(self, reverse=True):
         self.items = self._dict.items()
         self.items.sort(key=lambda x: x[1]['val'], reverse=reverse)
 
