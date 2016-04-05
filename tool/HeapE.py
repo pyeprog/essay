@@ -28,6 +28,9 @@ class HeapE(object):
     def getSol(self):
         return self._dict['sol']
 
+    def solSize(self):
+        return len(self._dict['sol'])
+
     def setSol(self, sol, scr):
         if not (isinstance(sol, set) and isinstance(scr, (float, int))):
             raise TypeError
@@ -70,6 +73,9 @@ class HeapE(object):
     def __deepcopy__(self, memodict={}):
         return HeapE(self.toDict())
 
+    def __len__(self):
+        return self.solSize()
+
 if __name__ == '__main__':
     A = HeapE()
     B = copy.deepcopy(A)
@@ -77,3 +83,4 @@ if __name__ == '__main__':
     print B
     print A
     print A < B
+    print len(B)
